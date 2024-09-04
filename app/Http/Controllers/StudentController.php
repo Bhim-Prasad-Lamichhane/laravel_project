@@ -68,10 +68,9 @@ class StudentController extends Controller
     }
 
 
-
     //to show specific id data
-    public function show($id){
-
+    public function show($id)
+    {
         if (!is_numeric($id)) {
             return response()->json([
                 'status' => false,
@@ -99,8 +98,8 @@ class StudentController extends Controller
 
 
      //to delete specific id data
-     public function destroy($id){
-
+     public function destroy($id)
+     {
         if (!is_numeric($id)) {
             return response()->json([
                 'status' => false,
@@ -124,11 +123,12 @@ class StudentController extends Controller
                     'data' => []
                 ], 200);
             }
-    }
+     }
 
 
     //update the student
-    public function update(Request $request, $id){
+    public function update(Request $request, $id)
+    {
         if (!is_numeric($id)) {
             return response()->json([
                 'status' => false,
@@ -182,6 +182,7 @@ class StudentController extends Controller
         }
     }
 
+    //search students based on name,age,email and address
     public function search(Request $request)
     {
         // Get search parameters from the query string
@@ -190,9 +191,9 @@ class StudentController extends Controller
         $address = $request->query('address');
         $email = $request->query('email');
 
-    // Build the query based on the search parameters
-    $query = StudentModel::query();
-    
+        // Build the query based on the search parameters
+        $query = StudentModel::query();
+        
        if($name){
             $query->where('name','LIKE',"%{$name}%");
         }
