@@ -15,4 +15,5 @@ Route::delete('/students/{id}',[StudentController::class,'destroy']);
 Route::put('/students/{id}',[StudentController::class,'update']);
 
 
+Route::get('/students/search/query',[StudentController::class,'search']);
 

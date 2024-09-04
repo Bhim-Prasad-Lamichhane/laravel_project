@@ -28,7 +28,7 @@ class StudentController extends Controller
        $total = StudentModel::all()->count(); //fetch total number of data in the table
         return response()->json([
             'status' => true,
-            'message' => 'Customers retrieved successfully',
+            'message' => 'Students retrieved successfully',
             'total_data'=>$total,
             'data' => $students
         ], 200);
@@ -57,7 +57,6 @@ class StudentController extends Controller
 
         // Create a new student record
         $student = StudentModel::create($validator->validated());
-
 
         // Return a success response
         $response = [
@@ -127,6 +126,8 @@ class StudentController extends Controller
             }
     }
 
+
+    //update the student
     public function update(Request $request, $id){
         if (!is_numeric($id)) {
             return response()->json([
@@ -179,8 +180,66 @@ class StudentController extends Controller
                 "errors" => $validator->errors()
             ], 422); // 422 Unprocessable Entity status code
         }
+    }
+
+    public function search(Request $request)
+    {
+        // Get search parameters from the query string
+        $name = $request->query('name');
+        $age = $request->query('age');
+        $address = $request->query('address');
+        $email = $request->query('email');
+
+    // Build the query based on the search parameters
+    $query = StudentModel::query();
+    
+       if($name){
+            $query->where('name','LIKE',"%{$name}%");
+        }
+
+        if ($age) {
+            $query->where('age', $age);
+        }
+    
+        if ($address) {
+            $query->where('address', 'LIKE', "%{$address}%");
+        }
+
+        if ($email) {
+            $query->where('email', 'LIKE', "%{$email}%");
+        }
+
+        // dd($query->toSql(), $query->getBindings());  if we like to see the query, we need to call toSql and getBinging methods
+        
+        // Execute the query and get the results
+        $students = $query->get();
+
+        // dd($students);  to see the output
+
+        // Check if any results were found
+        if ($students->isEmpty()) {
+            // Build the response for no data found
+            $response = [
+                'status' => false,
+                'message' => 'No data found for the given criteria',
+                'data' => []
+            ];
+            return response()->json($response, 404);
+        }
+        
+        // Build the response with the results
+        $response = [
+            'status' => true,
+            'message' => 'Students retrieved successfully',
+            'total_data' => $students->count(),
+            'data' => $students
+        ];
+
+         return response()->json($response, 200);
 
     }
+
+
 }
 
 
