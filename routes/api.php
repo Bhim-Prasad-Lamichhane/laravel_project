@@ -27,5 +27,5 @@ Route::controller(StudentController::class)->group(function(){
     Route::delete('/students/{id}','destroy');
     Route::put('/students/{id}','update');
     
-    Route::get('/students/search/query','search');
+    Route::get('/students/search/query','search');  //{{laravel_url}}/api/students/search/query?name=John
 });

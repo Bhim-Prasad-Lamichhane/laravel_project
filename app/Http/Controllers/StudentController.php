@@ -5,16 +5,25 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
 use App\Models\StudentModel;
+use App\Repositories\StudentRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class StudentController extends Controller
 {
 
+    protected $studentrepointerface;
+
+    public function __construct(StudentRepositoryInterface $studentrepointerface)
+    {
+        $this->studentrepointerface = $studentrepointerface;
+
+    }
+
     //retrieve all students
     public function index()
     {
-        $students = StudentModel::all();
+        $students = $this->studentrepointerface->getAllStudents();
 
        if($students->isEmpty()){
 
@@ -41,7 +50,7 @@ class StudentController extends Controller
     public function store(StoreStudentRequest $request)
     {
         // Create a new student record
-        $student = StudentModel::create($request->validated());
+        $student = $this->studentrepointerface->createStudent($request->validated());
 
         // Return a success response
         $response = [
@@ -63,9 +72,8 @@ class StudentController extends Controller
                 'data' => []
             ], 400); // 400 Bad Request for invalid input
         }
-            $student =StudentModel::find($id);
-            // $info = $student->toArray();
-            // dd("player name = ".$info['name']);
+
+        $student = $this->studentrepointerface->getStudentById($id);
           
             if($student){
                 return response()->json([
@@ -94,8 +102,8 @@ class StudentController extends Controller
                 'data' => []
             ], 400); // 400 Bad Request for invalid input
         }
-            $studentinfo =StudentModel::find($id);
-            $student =StudentModel::destroy($id);
+            $studentinfo = $this->studentrepointerface->getStudentById($id);
+            $student = $this->studentrepointerface->deleteStudent($id);
 
             if($student){
                 return response()->json([
@@ -116,6 +124,8 @@ class StudentController extends Controller
     //update the student
     public function update(UpdateStudentRequest $request, $id)
     {
+        $student = $this->studentrepointerface->updateStudent($id, $request->validated());
+
         if (!is_numeric($id)) {
             return response()->json([
                 'status' => false,
@@ -123,8 +133,6 @@ class StudentController extends Controller
                 'data' => []
             ], 400); // 400 Bad Request for invalid input
         }
-
-        $student =StudentModel::find($id);
 
         if(!$student){
             return response()->json([
@@ -142,77 +150,27 @@ class StudentController extends Controller
                     'message' => 'Student updated successfully',
                     'data' => $student
                 ], 200);
-        
-
-         // Check if validation fails
-        if ($validator->fails()) {
-            return response()->json([
-                "status" => false,
-                "message" => "Validation Error",
-                "errors" => $validator->errors()
-            ], 422); // 422 Unprocessable Entity status code
-        }
-    }
+            }
 
     //search students based on name,age,email and address
     public function search(Request $request)
     {
-        // Get search parameters from the query string
-        $name = $request->query('name');
-        $age = $request->query('age');
-        $address = $request->query('address');
-        $email = $request->query('email');
+        $students = $this->studentrepointerface->searchStudents($request);
 
-        // Build the query based on the search parameters
-        $query = StudentModel::query();
-        
-       if($name){
-            $query->where('name','LIKE',"%{$name}%");
-        }
-
-        if ($age) {
-            $query->where('age', $age);
-        }
-    
-        if ($address) {
-            $query->where('address', 'LIKE', "%{$address}%");
-        }
-
-        if ($email) {
-            $query->where('email', 'LIKE', "%{$email}%");
-        }
-
-        // dd($query->toSql(), $query->getBindings());  if we like to see the query, we need to call toSql and getBinging methods
-        
-        // Execute the query and get the results
-        $students = $query->get();
-
-        // dd($students);  to see the output
-
-        // Check if any results were found
         if ($students->isEmpty()) {
-            // Build the response for no data found
-            $response = [
+            return response()->json([
                 'status' => false,
-                'message' => 'No data found for the given criteria',
+                'message' => 'No data found',
                 'data' => []
-            ];
-            return response()->json($response, 404);
+            ], 404);
         }
-        
-        // Build the response with the results
-        $response = [
+
+        return response()->json([
             'status' => true,
             'message' => 'Students retrieved successfully',
-            'total_data' => $students->count(),
             'data' => $students
-        ];
-
-         return response()->json($response, 200);
-
+        ], 200);
     }
-
-
 }
 
 
