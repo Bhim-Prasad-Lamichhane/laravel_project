@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreStudentRequest;
+use App\Http\Requests\UpdateStudentRequest;
 use App\Models\StudentModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -36,27 +38,10 @@ class StudentController extends Controller
 
 
     //create the students
-    public function store(Request $request)
+    public function store(StoreStudentRequest $request)
     {
-         // Validate the incoming request data
-         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|min:3|max:255',
-            'age' => 'required|integer|min:4',
-            'address' => 'required|string|min:3|max:255',
-            'email' => 'required|email|unique:students_info,email',
-        ]);
-
-         // Check if validation fails
-        if ($validator->fails()) {
-            return response()->json([
-                "status" => false,
-                "message" => "Validation Error",
-                "errors" => $validator->errors()
-            ], 422); // 422 Unprocessable Entity status code
-        }
-
         // Create a new student record
-        $student = StudentModel::create($validator->validated());
+        $student = StudentModel::create($request->validated());
 
         // Return a success response
         $response = [
@@ -79,7 +64,9 @@ class StudentController extends Controller
             ], 400); // 400 Bad Request for invalid input
         }
             $student =StudentModel::find($id);
-
+            // $info = $student->toArray();
+            // dd("player name = ".$info['name']);
+          
             if($student){
                 return response()->json([
                     'status' => true,
@@ -97,9 +84,9 @@ class StudentController extends Controller
     }
 
 
-     //to delete specific id data
-     public function destroy($id)
-     {
+    //to delete specific id data
+    public function destroy($id)
+    {
         if (!is_numeric($id)) {
             return response()->json([
                 'status' => false,
@@ -123,11 +110,11 @@ class StudentController extends Controller
                     'data' => []
                 ], 200);
             }
-     }
+    }
 
 
     //update the student
-    public function update(Request $request, $id)
+    public function update(UpdateStudentRequest $request, $id)
     {
         if (!is_numeric($id)) {
             return response()->json([
@@ -146,31 +133,16 @@ class StudentController extends Controller
                 'data' => []
             ], 200);
          
-        }else{
-             // Validate the incoming request data
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string|min:3|max:255',
-                'age' => 'required|integer|min:4',
-                'address' => 'required|string|min:3|max:255',
-                'email' => 'required|email|unique:students_info,email',
-            ]);
-
-         // Check if validation fails
-            if ($validator->fails()) {
-                return response()->json([
-                    "status" => false,
-                    "message" => "Validation Error",
-                    "errors" => $validator->errors()
-                ], 422); // 422 Unprocessable Entity status code
-            }
-
-                $student->update($request->all());
+        }
+           // Validate and update the student record
+             $validatedData = $request->validated();
+                $student->update($validatedData);
                 return response()->json([
                     'status' => true,
                     'message' => 'Student updated successfully',
                     'data' => $student
                 ], 200);
-        }
+        
 
          // Check if validation fails
         if ($validator->fails()) {
