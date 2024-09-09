@@ -4,26 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
-use App\Models\StudentModel;
-use App\Repositories\StudentRepositoryInterface;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use Student; // The facade alias defined in config/app.php
 
 class StudentController extends Controller
 {
 
-    protected $studentrepointerface;
-
-    public function __construct(StudentRepositoryInterface $studentrepointerface)
-    {
-        $this->studentrepointerface = $studentrepointerface;
-
-    }
-
     //retrieve all students
     public function index()
     {
-        $students = $this->studentrepointerface->getAllStudents();
+        $students = Student::getAllStudents();
 
        if($students->isEmpty()){
 
@@ -36,11 +26,10 @@ class StudentController extends Controller
         return response()->json($response,404);
        };
 
-       $total = StudentModel::all()->count(); //fetch total number of data in the table
         return response()->json([
             'status' => true,
             'message' => 'Students retrieved successfully',
-            'total_data'=>$total,
+            'total_data' => $students->count(),
             'data' => $students
         ], 200);
     }
@@ -50,7 +39,7 @@ class StudentController extends Controller
     public function store(StoreStudentRequest $request)
     {
         // Create a new student record
-        $student = $this->studentrepointerface->createStudent($request->validated());
+        $student = Student::createStudent($request->validated());
 
         // Return a success response
         $response = [
@@ -73,7 +62,7 @@ class StudentController extends Controller
             ], 400); // 400 Bad Request for invalid input
         }
 
-        $student = $this->studentrepointerface->getStudentById($id);
+        $student = Student::getStudentById($id);
           
             if($student){
                 return response()->json([
@@ -102,8 +91,8 @@ class StudentController extends Controller
                 'data' => []
             ], 400); // 400 Bad Request for invalid input
         }
-            $studentinfo = $this->studentrepointerface->getStudentById($id);
-            $student = $this->studentrepointerface->deleteStudent($id);
+        $studentinfo = Student::getStudentById($id);
+        $student = Student::deleteStudent($id);
 
             if($student){
                 return response()->json([
@@ -124,7 +113,7 @@ class StudentController extends Controller
     //update the student
     public function update(UpdateStudentRequest $request, $id)
     {
-        $student = $this->studentrepointerface->updateStudent($id, $request->validated());
+        $student = Student::updateStudent($id, $request->validated());
 
         if (!is_numeric($id)) {
             return response()->json([
@@ -155,7 +144,7 @@ class StudentController extends Controller
     //search students based on name,age,email and address
     public function search(Request $request)
     {
-        $students = $this->studentrepointerface->searchStudents($request);
+        $students = Student::searchStudents($request);
 
         if ($students->isEmpty()) {
             return response()->json([

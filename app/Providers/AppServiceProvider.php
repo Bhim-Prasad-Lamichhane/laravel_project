@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Repositories\StudentRepositoryInterface;
+use App\Repositories\StudentRepositoryClass;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -11,9 +13,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(
-            \App\Repositories\StudentRepositoryInterface::class,
-            \App\Repositories\StudentRepositoryClass::class);
+        $this->app->singleton(StudentRepositoryInterface::class, StudentRepositoryClass::class);
+        
+        // Alternatively, bind the repository using a unique string for facades
+        $this->app->singleton('studentRepository', function($app) {
+            return $app->make(StudentRepositoryClass::class);
+        });
+
     }
 
     /**

@@ -123,4 +123,9 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'aliases' => [
+    // Other facades...
+    'Student' => App\Facades\StudentFacade::class,
+    ],
+
 ];
